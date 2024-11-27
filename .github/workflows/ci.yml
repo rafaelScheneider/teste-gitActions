@@ -24,46 +24,20 @@ jobs:
 
     - name: Build artifacts
       run: |
-        if [ -f "pom.xml" ]; then
-          mvn clean package
-          cp target/*.jar artifact.jar
-        fi
+        mvn clean package
+        cp target/*.jar artifact.jar
 
     - name: Set up SSH key
       uses: webfactory/ssh-agent@v0.7.0
       with:
-        ssh-private-key: -----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEAtBnbkUDN8KfzKAlzVYvhlPTTfmovRog0n9uV9xOrD4cS4VGK
-0HOqT55tBfg6ciBQhdOWRbHj8Gd914JszIOZdUX9QNaMw64bA0vHeWMrD+faz1ly
-266iepddmzwq2sm6Il654A1Q0Azjl9r9RNP+w0oY+zLAZgEOItTroBAyBLH61epc
-LZI2DXOV8V6gcgNwh+Sgew9+WhaOCgUUqLclmAnA80ZODmLoUdZWfLIIta0ONmP0
-DK+bQ0kiLs9/x0Z0UuCN4XJK6aDslvCIdCrfUB6EcUNwVwzvKNy0ZnrqSlDB1mGz
-QkW7Ldmo3nbGOtZARVU+mi4BSZV+lHU0eNEGlQIDAQABAoIBAH4GNglfInxK2bBj
-ZIww9KoJ41BrNyeQudo+iqK45ZNY/lIigBM7TKqn/jwWJbekexQaKeYdA5Y+pOU/
-w6gcUi6oyf0r5JYs54QX6746MXDQ2eEMA35LpjBIaNzubkJotFHGnSR1zN24ly20
-tFMMURIQcIieS9lU1bJz8Wkwy/9R6V+VYJIRmh1ta/d/c1O3ycpDOm/vykRjiaVS
-+8hIqE3xqkCmnnwJ17s8LQ/zQsSwm1l6M3Vs3v0tIaGb4bH2xaDA47uEzkqxjYh9
-GmBbimZkY9/0xtZARb027EidVKJGzHtk8612dNyhgCYeylZteJOxT0XPrGcIlHb0
-xvmSQSUCgYEA7XUQUYjvyaOFXspggLeRWAcPAbU8vJfUMujWGHoCZolWYSMPyWsS
-crVuDxGsZB5j2MkYtrQeCABmM21+FnZsH1y87C+opZ9AVVb46gOC8+8398d6iJMS
-r2012GcBkFoz/oTN5eBugZTFh/cwdNkHznNI1VCKUYuSlc2ETysYuKMCgYEAwioz
-vj8XSG4QZNJhBX2MI9ik9fIKJMKq9RuWJskIWusTDeV/xMfjTFtsiWDN+NFBoK9x
-ASMWjh6jxQjGSASifRFMxrhECKASj0znTt9gVUDahg1DigEtDcS5l0Prze4EPbuC
-wk9j79rb19gRmfZXkxFkTLYGtGNr40UbGTehH2cCgYEAmvsquWycxIg7hhCkR56H
-+GIzAzRc/eJCly+sfLE1W+MLQ770kMuXcNLFkIRCdd334QfvX1/TsflAuxQdlV+Z
-VibbD3RTqDV2cbygHWxJThi1+LxzVyxWp7SpziH8vVCCWv4mvIBs35pQClvlfn4g
-QDiyMresb2ifNbK7Rkiki+0CgYAzcODij26ItvhK7d3ciYWeXaBetLBxSs3mQFfI
-kMxQ4iTbMqlmJhsXOMWJpAcN28rKWpDS30vzfTSgWBHINMoj3nh70YfczSP9qT9D
-CzVHgPYkO9Ff963LDwqog8sudNfUzx/2gPgWLOK/zbPkGXrcMOhk1njyQ8Dqpn1m
-cfGTEwKBgQCAI6Qon8LqhQaElrerxdbI8g2xJjBW3VGsoixc3FhxixbQZEHTxeFO
-sAt6SJHqzQli19gaHeVajwOvcrnDejghYXDtv8f0K56W4Lwwhdg4Fm3QZ/m6DDJx
-wvUTubfo6ZMoMmeb2RtXhJbbXSnmVUighSLsIx2hcFIXZoAIqdkJ0w==
------END RSA PRIVATE KEY-----
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
+    - name: Adicionar chave do host do EC2 ao known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 52.207.230.105 >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
 
     - name: Upload artifacts to EC2
-      env:
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
       run:
         scp artifact.jar ubuntu@52.207.230.105:/var/www/app/
