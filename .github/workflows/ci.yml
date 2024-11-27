@@ -35,10 +35,10 @@ jobs:
     - name: Adicionar chave do host do EC2 ao known_hosts
       run: |
         mkdir -p ~/.ssh
-        ssh-keyscan -H 52.207.230.105 >> ~/.ssh/known_hosts || echo "Erro ao adicionar chave do host"
+        ssh-keyscan -H 54.83.96.58 >> ~/.ssh/known_hosts || echo "Erro ao adicionar chave do host"
         chmod 644 ~/.ssh/known_hosts
         ls -l ~/.ssh/known_hosts  # Verifica se o arquivo known_hosts foi criado corretamente
 
     - name: Upload artifacts to EC2
       run:
-        scp artifact.jar ubuntu@52.207.230.105:/var/www/app/
+        scp artifact.jar ubuntu@54.83.96.58:/var/www/app/
