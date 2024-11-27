@@ -1,0 +1,24 @@
+name: CI/CD para Spring Boot com Maven e publicação em EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Atualização do código
+      uses: actions/checkout@v2
+
+    - name: Definindo a versão da JDK 
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Build com Maven
+      run: mvn -f package -DskipTests
+      
