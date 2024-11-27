@@ -39,11 +39,7 @@ jobs:
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
-      run: |
-        if [ -f "artifact.jar" ]; then
-          scp artifact.jar $EC2_USER@$EC2_HOST:/var/www/app/
-        elif [ -f "artifact.tar.gz" ]; then
-          scp artifact.tar.gz $EC2_USER@$EC2_HOST:/var/www/app/
-        fi
+      run:
+        scp artifact.jar $EC2_USER@$EC2_HOST:/var/www/app/
 
       
