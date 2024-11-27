@@ -1,0 +1,64 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        if: fileExists('pom.xml')
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Node.js
+        if: fileExists('package.json')
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and run tests
+        run: |
+          if [ -f "pom.xml" ]; then
+            mvn clean test
+          elif [ -f "package.json" ]; then
+            npm install
+            npm test
+          fi
+
+      - name: Build artifacts
+        run: |
+          if [ -f "pom.xml" ]; then
+            mvn clean package
+            cp target/*.jar artifact.jar
+          elif [ -f "package.json" ]; then
+            npm run build
+            tar -czf artifact.tar.gz dist/
+          fi
+
+      # 6. Configurar chave SSH para acesso à instância EC2
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      # 7. Enviar artefatos para a instância EC2
+      - name: Upload artifacts to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }} # Endereço da instância EC2
+          EC2_USER: ${{ secrets.EC2_USER }} # Usuário SSH, ex: ubuntu
+        run: |
+          if [ -f "artifact.jar" ]; then
+            scp artifact.jar $EC2_USER@$EC2_HOST:/var/www/app/
+          elif [ -f "artifact.tar.gz" ]; then
+            scp artifact.tar.gz $EC2_USER@$EC2_HOST:/var/www/app/
+          fi
